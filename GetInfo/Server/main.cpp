@@ -2,14 +2,15 @@
 #include <iostream>
 
 #include <zmq.hpp>
-#include "Client_connect.h"
+#include "Connect_to_client.h"
 
-int main() 
+
+int main(int agrc, char* argv[]) 
 {
-    zmq::context_t context{1};
-    zmq::socket_t socket{context, zmq::socket_type::rep};
+    zmq::context_t context{ 1 };
+    zmq::socket_t socket{ context, zmq::socket_type::rep };
     socket.bind("tcp://*:5555");
-    Client_connect toClient(socket);
+    Server_process ServProcess(socket);
 
     while (true)
     {
@@ -20,9 +21,8 @@ int main()
             return 0; 
         }
         else { 
-            toClient.Client_command(request); 
+            ServProcess.clients_command(request);
         }
-    }
-    
+    }  
     return 0;
 }
