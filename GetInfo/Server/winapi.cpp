@@ -1,7 +1,7 @@
 #include "winapi.h"
 
 
-void Winapi::GetOsVersion1(std::string& str) const {
+void CommandHandler::getOsVersion(std::string& str) const {
     if (IsWindows10OrGreater()) { str.append("Windows 10.0"); return; }
 	if (IsWindows8Point1OrGreater()) { str.append("Windows 8.1"); return; }
 	if (IsWindows8OrGreater()) { str.append("Windows 8"); return; }
@@ -9,7 +9,7 @@ void Winapi::GetOsVersion1(std::string& str) const {
 	if (IsWindowsVistaOrGreater()) { str.append("Windows Vista"); return; }
 };
 
-void Winapi::GetMemoryStatus1(std::string& str) const {
+void CommandHandler::getMemoryStatus(std::string& str) const {
 	MEMORYSTATUSEX statex;
 	const auto DIV{ 1048576 }; // To convert bytes to Mb
 	statex.dwLength = sizeof(statex);
@@ -30,18 +30,10 @@ void Winapi::GetMemoryStatus1(std::string& str) const {
     str.append("Paging file memory free: ");
     str.append(std::to_string(statex.ullAvailPageFile / DIV));
     str.append(" Mb\n");
-    //-------------
-    str.append("Total virtual memory: ");
-    str.append(std::to_string(statex.ullTotalVirtual / DIV));
-    str.append(" Mb\n");
-    //-------------
-    str.append("Virtual memory free: ");
-    str.append(std::to_string(statex.ullAvailVirtual / DIV));
-    str.append(" Mb\n");
 };
 
 
-void Winapi::GetSystemTime1(std::string& str) const {
+void CommandHandler::getSystemTime(std::string& str) const {
     SYSTEMTIME lt;
     GetLocalTime(&lt);
 
@@ -50,7 +42,7 @@ void Winapi::GetSystemTime1(std::string& str) const {
     str.append(std::to_string(lt.wMinute));
 }
 
-void Winapi::GetTickCount1(std::string& str) const {
+void CommandHandler::getTickCount(std::string& str) const {
     auto hour_value = (static_cast<int>(GetTickCount64())) / 3600000;
     auto min_value = ((static_cast<int>(GetTickCount64())) / 60000) - (hour_value * 60);
 
@@ -59,7 +51,7 @@ void Winapi::GetTickCount1(std::string& str) const {
     str.append(std::to_string(min_value));
 }
 
-void Winapi::GetDrivetype1(std::string& str) {
+void CommandHandler::getDisktype(std::string& str) {
     wchar_t buffer[256];
     DWORD sizebuf{ 256 };
     GetLogicalDriveStrings(sizebuf, buffer);
@@ -90,10 +82,10 @@ void Winapi::GetDrivetype1(std::string& str) {
 
 typedef BOOL(WINAPI* P_GDFSE)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
 
-void Winapi::GetFreeSpace1(std::string& str) {
+void CommandHandler::getFreeSpace(std::string& str) {
     const auto DIV{ 1048576 }; // To convert bytes to Mb
     std::string temp;
-    GetDrivetype1(temp);
+    getDisktype(temp);
     unsigned __int64 i64FreeBytesToCaller, i64TotalBytes, i64FreeBytes;
 
     auto it_name_begin = _hard_name.begin();
@@ -119,7 +111,7 @@ void Winapi::GetFreeSpace1(std::string& str) {
     }
 }
 
-void Winapi::GetObjectOwner1(const std::string& file_name, std::string& str) const {
+void CommandHandler::getObjectOwner(const std::string& file_name, std::string& str) const {
     PSID OwnerSid;
     PACL Dacl;
     WCHAR buf[1024];
@@ -142,30 +134,8 @@ void Winapi::GetObjectOwner1(const std::string& file_name, std::string& str) con
     temp_wstr.clear();
     while (buf[i]) {
         temp_wstr.push_back(buf[i]);
+        buf[i] = 0;
         ++i;
     }
-    if (temp_wstr.size() > 100) { str.append("Wrong file path! Repeat!"); }
-    else str.append(temp_wstr.begin(), temp_wstr.end());
-}
-
-void Winapi::GetObjectAcl1(const std::string& file_name, std::string& str) const {
-    PSID OwnerSid;
-    PACL Dacl;
-    PSECURITY_DESCRIPTOR pSecDesc;
-    TRUSTEE_W Trustee;
-    ACCESS_MASK Rigth;
-    std::wstring temp_wstr;
-    temp_wstr.assign(file_name.begin(), file_name.end());
-
-    GetNamedSecurityInfoW(temp_wstr.c_str(), SE_FILE_OBJECT,
-        OWNER_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, &OwnerSid,
-        NULL, &Dacl, NULL, &pSecDesc);
-
-    BuildTrusteeWithSidW(&Trustee, OwnerSid);
-    if (GetEffectiveRightsFromAcl(Dacl, &Trustee, &Rigth) != ERROR_SUCCESS) {
-        str.append("Access denial!\n");
-    }
-    else {
-        str.append("You have access!\n");
-    }
+    str.append(temp_wstr.begin(), temp_wstr.end());
 }
