@@ -6,18 +6,17 @@
 #include <Windows.h>
 #include <VersionHelpers.h>
 
-class Winapi {
+class CommandHandler {
 public:
-	Winapi() { }
+	CommandHandler() { }
 
-	void GetOsVersion1(std::string& str) const;
-	void GetMemoryStatus1(std::string& str) const;
-	void GetSystemTime1(std::string& str) const;
-	void GetTickCount1(std::string& str) const;
-	void GetDrivetype1(std::string& str);
-	void GetFreeSpace1(std::string& str);
-	void GetObjectAcl1(const std::string& file_name, std::string& str) const;
-	void GetObjectOwner1(const std::string& file_name, std::string& str) const;
+	void getOsVersion(std::string& str) const;
+	void getMemoryStatus(std::string& str) const;
+	void getSystemTime(std::string& str) const;
+	void getTickCount(std::string& str) const;
+	void getDisktype(std::string& str);
+	void getFreeSpace(std::string& str);
+	void getObjectOwner(const std::string& file_name, std::string& str) const;
 private:
 	std::string _hard_name; //HARD DISK BUFFER
 };
